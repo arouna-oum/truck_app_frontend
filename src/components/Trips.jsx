@@ -78,7 +78,7 @@ export default function Trips() {
         try {
             const res = await axiosInstance.get("trip/status_choices/")
             console.log("The response given is ", res.data);
-            setStatus(res.data);
+            setStatus(res.data['status_choices']);
             setFilters(filters.concat(res.data['status_choices']));
             console.log("Right now the statuses are ", statuses);
         } catch (error) {

@@ -143,10 +143,10 @@ useEffect(() => {
             <strong>{trip.hos_cycle}</strong>
           </div>
 
-          <div className="info-row">
+          {/* <div className="info-row">
             <span>Current Cycle Used</span>
             <strong>42h 15m</strong>
-          </div>
+          </div> */}
         </div>
 
         {/* CENTER CARD */}
@@ -182,10 +182,10 @@ useEffect(() => {
 
           <h3>ELD Summary</h3>
 
-          <div className="eld-item">
+          {/* <div className="eld-item">
             <span>Total Drive Time</span>
             <strong>16h 45m</strong>
-          </div>
+          </div> */}
 
           <div className="eld-item">
             <span>Available Drive Time</span>
@@ -205,12 +205,12 @@ useEffect(() => {
             </strong>
           </div>
 
-          <div className="eld-item">
+          {/* <div className="eld-item">
             <span>Cycle Remaining</span>
             <strong>
               33h 45m / 70h
             </strong>
-          </div>
+          </div> */}
 
           <div className="stops-section">
 

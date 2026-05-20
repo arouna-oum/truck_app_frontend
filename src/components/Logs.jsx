@@ -111,7 +111,11 @@ export default function Logs() {
                 eld_trip.daily_logs[0].segments
             )
             : null;
-
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: '2-digit',
+  year: 'numeric',
+}).format(new Date());
   return (
     <div className="logs-page">
       <div className="logs-topbar">
@@ -125,7 +129,12 @@ export default function Logs() {
       <div className="logs-card">
         <div className="logs-card-header">
           <span className="card-title">Today's log</span>
-          <span className="card-sub">John Driver · May 19, 2026</span>
+          <span className="card-sub">{user?.username || ""} · {trip ?new Date(trip.departure_date)
+                    .toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    }) : ''}</span>
         </div>
         <div className="eld-wrap">
           <div className="eld-grid">
