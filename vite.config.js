@@ -1,8 +1,21 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
+// // https://vitejs.dev/config/
+// export default defineConfig({
+//   plugins: [react()],
+//   base: process.env.VITE_BASE_PATH || "/truck_app_frontend",
+// })
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
 export default defineConfig({
   plugins: [react()],
-  base: process.env.VITE_BASE_PATH || "/truck_app_frontend",
-})
+  base: "/",
+  build: {
+    outDir: "dist"
+  },
+  server: {
+    historyApiFallback: true
+  }
+});
