@@ -124,8 +124,8 @@ function Sidebar(){
                         <NavLink to="dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Dashboard /> <span>Dashboard</span></NavLink>
                         <NavLink to="trips" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Trips /> <span>Trips</span></NavLink>
                         <NavLink to="logs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Logs /> <span>Logs</span></NavLink>
-                        <NavLink to="drivers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Drivers /> <span>Drivers</span></NavLink>
-                        <NavLink to="reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Reports /> <span>Reports</span></NavLink>
+                        {/* <NavLink to="drivers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Drivers /> <span>Drivers</span></NavLink>
+                        <NavLink to="reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Reports /> <span>Reports</span></NavLink> */}
                         <NavLink to="settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Settings /> <span>Settings</span></NavLink>
                         <NavLink onClick={() => handleLogout()} to="logout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Logout /> <span>Logout</span></NavLink>
                     </nav>

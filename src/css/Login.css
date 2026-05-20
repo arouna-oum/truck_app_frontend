@@ -14,7 +14,7 @@
   background-position: center;
   
   /* Note: To use the exact illustrated road asset, replace the background line above with: */
-  /* background: url('/path-to-your-road-illustration.png') no-repeat center center/cover; */
+  background: url('../assets/loginimg.jpg') no-repeat center center/cover;
 }
 
 /* Card Styling */

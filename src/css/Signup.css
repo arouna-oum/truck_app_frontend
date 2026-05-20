@@ -218,7 +218,7 @@
   background-position: center;
 
   /* Inject illustration asset here when ready: */
-  /* background: url('/path-to-your-truck-road-illustration.png') no-repeat center center/cover; */
+  background: url('../assets/signupimg.jpg') no-repeat center center/cover;
 }
 
 /* Beautiful curved panel containing feature highlights */

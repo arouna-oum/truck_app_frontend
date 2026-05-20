@@ -57,7 +57,7 @@ export default function Trips() {
 
   const canNext = () => {
     if (step === 0) return form.origin.trim() && form.destination.trim() && form.tractor_number;
-    if (step === 1) return form.departure_date && form.cargo_type && form.assigned_driver_id && form.hos_cycle;
+    if (step === 1) return form.departure_date && form.cargo_type && form.assigned_driver_id && form.hos_cycle && form.load_number;
     return true;
   };
 
@@ -70,6 +70,7 @@ export default function Trips() {
     const [hos_types, setHOS] = useState([]);
     const [user_list, setUsers] = useState([]);
     const [all_trips, setAllTrips] = useState([]);
+    const [all_trips_details, setAllTripsDetails] = useState([]);
     const [user, setUser] = useState(null);
     const filtered = active === "All" ? (all_trips || []) : (all_trips || []).filter(t => t.status === active);
     // Requests start
@@ -77,9 +78,20 @@ export default function Trips() {
         try {
             const res = await axiosInstance.get("trip/status_choices/")
             console.log("The response given is ", res.data);
-            setStatus(res.data['status_choices']);
+            setStatus(res.data);
             setFilters(filters.concat(res.data['status_choices']));
             console.log("Right now the statuses are ", statuses);
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    }
+
+    const get_trip_details = async (e) => {
+        try {
+            const res = await axiosInstance.get("trip/trip_details/"+user?.id+"/")
+            console.log("The response given is ", res.data);
+            setAllTripsDetails(res.data);
+            console.log("Right now the trip details are ", all_trips_details);
         } catch (error) {
             console.log("An error occured here ", error);
         }
@@ -180,6 +192,7 @@ export default function Trips() {
             setShowModal(false);
             setEditTrip(null);
             get_all_trips(); 
+            get_trip_details();
         } catch (error) {
             console.log("An error occurred:", error);
 
@@ -238,6 +251,7 @@ export default function Trips() {
 
         if(user){
             get_all_trips();
+            get_trip_details();
         }
 
     }, [user]);
@@ -590,12 +604,28 @@ export default function Trips() {
       )}
 
       <div className="trips-stats">
-        {stats.map(s => (
+        {/* {stats.map(s => (
           <div className="stat-card" key={s.label}>
             <div className="stat-label">{s.label}</div>
             <div className="stat-value" style={s.color ? { color: s.color } : {}}>{s.value}</div>
           </div>
-        ))}
+        ))} */}
+        <div className="stat-card">
+            <div className="stat-label">Total trips</div>
+            <div className="stat-value">{all_trips_details ? all_trips_details['total']:0}</div>
+        </div>
+        <div className="stat-card">
+            <div className="stat-label">Completed</div>
+            <div className="stat-value" style={{ color: "#15803d"}}>{all_trips_details ? all_trips_details['completed']:0}</div>
+        </div>
+        <div className="stat-card">
+            <div className="stat-label">In Transit</div>
+            <div className="stat-value" style={{ color: "#ea580c" }}>{all_trips_details ? all_trips_details['in_transit']:0}</div>
+        </div>
+        <div className="stat-card">
+            <div className="stat-label">Pending</div>
+            <div className="stat-value" style={{ color: "#1d4ed8" }}>{all_trips_details ? all_trips_details['pending']:0}</div>
+        </div>
       </div>
 
       <div className="trips-filters">

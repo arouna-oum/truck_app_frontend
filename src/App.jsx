@@ -35,8 +35,8 @@ function App() {
               <Route path="trips" element={<Trips/>} />
               <Route path="view_trip" element={<TripDetails/>} />
               <Route path="logs" element={<Logs/>} />
-              <Route path="drivers" element={<Drivers/>} />
-              <Route path="reports" element={<Reports/>} />
+              {/* <Route path="drivers" element={<Drivers/>} />
+              <Route path="reports" element={<Reports/>} /> */}
               <Route path="settings" element={<Settings/>} />
               <Route path="logout" element={<Logout/>} />
             </Route>

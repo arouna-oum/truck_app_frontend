@@ -36,7 +36,7 @@ function Login(){
     };
 
     return (
-        <div className="Login mt-5">
+        <div className="Login mt-0">
             <div className="login-container">
                 <div className="login-card">
                     {/* Logo Header */}

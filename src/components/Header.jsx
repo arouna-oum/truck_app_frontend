@@ -1,14 +1,33 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import '../css/Header.css';
 import { userService, userSubject } from '../userStore';
 import { use } from 'react';
 
 function Header(){
+    const location = useLocation();
+
+    const hiddenRoutes = ['/sidebar/dashboard', '/sidebar/trips', '/sidebar/logs', 
+                            '/sidebar/drivers', '/sidebar/reports', '/sidebar/settings', 
+                            '/sidebar/logout', '/sidebar/view_trip'];
+
+    if (hiddenRoutes.some(route => location.pathname.startsWith(route))) {
+        return null;
+    }
     const [user, setUser] = useState(null);
     const [navItems, setNavItems] = useState(["Home", "Login"]);
     const [menuOpen, setMenuOpen] = useState(false);
-
+    const get_user_from_local_storage = () => {
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        console.log("User data Loaded 2: ", user_val);
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+    }
     useEffect(() => {
         // This code runs once on mount (like ngOnInit)
         console.log("Component has initialized!");
