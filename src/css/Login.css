@@ -1,0 +1,244 @@
+.login-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Fallback gradient styling that mimics the background colors of the original image */
+  background: linear-gradient(135deg, #eef4fc 0%, #dbe7f6 50%, #cadbf0 100%);
+  background-size: cover;
+  background-position: center;
+  
+  /* Note: To use the exact illustrated road asset, replace the background line above with: */
+  /* background: url('/path-to-your-road-illustration.png') no-repeat center center/cover; */
+}
+
+/* Card Styling */
+.login-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 460px;
+  padding: 40px 45px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Header & Typography */
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.truck-icon {
+  width: 26px;
+  height: 26px;
+  color: #1b66ff;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #1a1c23;
+  letter-spacing: -0.3px;
+}
+
+.logo-bold {
+  font-weight: 700;
+}
+
+.header-text-group {
+  margin-bottom: 32px;
+}
+
+.header-text-group h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1c23;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.header-text-group p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Form Styles */
+.login-form {
+  width: 100%;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 16px 14px 46px;
+  font-size: 0.95rem;
+  color: #1a1c23;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input:focus {
+  border-color: #1b66ff;
+  box-shadow: 0 0 0 3px rgba(27, 102, 255, 0.1);
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.password-toggle:hover svg {
+  stroke: #1a1c23;
+}
+
+/* Links */
+.forgot-password-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+  margin-bottom: 24px;
+}
+
+.forgot-password-link {
+  font-size: 0.85rem;
+  color: #1b66ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background-color: #1b66ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: #004fe6;
+}
+
+/* Divider Line */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.divider:not(:empty)::before {
+  margin-right: .75em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: .75em;
+}
+
+/* Google Sign In */
+.btn-google {
+  width: 100%;
+  padding: 13px;
+  background-color: #ffffff;
+  color: #1a1c23;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.btn-google:hover {
+  background-color: #f8fafc;
+}
+
+/* Footer Section */
+.signup-text {
+  margin-top: 32px;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: #1a1c23;
+}
+
+.signup-text a {
+  color: #1b66ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+
+/* Responsiveness adjustments for mobile environments */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 32px 24px;
+    border-radius: 12px;
+  }
+  
+  .header-text-group h2 {
+    font-size: 1.5rem;
+  }
+}

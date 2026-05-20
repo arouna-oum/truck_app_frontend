@@ -1,0 +1,302 @@
+/* Styling Configurations */
+.signup-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+/* --- Left Column (Form Interface) --- */
+.signup-left-col {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 60px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  z-index: 2;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.signup-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.truck-svg {
+  width: 28px;
+  height: 28px;
+  color: #1b66ff;
+}
+
+.logo-brand {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #1a1c23;
+  letter-spacing: -0.3px;
+}
+
+.logo-bold {
+  font-weight: 700;
+}
+
+.signup-header {
+  margin-bottom: 32px;
+}
+
+.signup-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1c23;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.signup-header p {
+  font-size: 1rem;
+  color: #1a1c23;
+  margin: 0;
+}
+
+/* Form Fields Layout */
+.register-form {
+  width: 100%;
+}
+
+.form-field {
+  position: relative;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  font-size: 0.95rem;
+  color: #1a1c23;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus {
+  border-color: #1b66ff;
+  box-shadow: 0 0 0 3px rgba(27, 102, 255, 0.1);
+}
+
+.field-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.visibility-toggle {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.visibility-toggle:hover svg {
+  stroke: #1a1c23;
+}
+
+/* Buttons Styling */
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #1b66ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.submit-btn:hover {
+  background-color: #004fe6;
+}
+
+/* Native Center Divider */
+.form-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0;
+  color: #1a1c23;
+  font-size: 0.85rem;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.form-divider:not(:empty)::before { margin-right: .75em; }
+.form-divider:not(:empty)::after { margin-left: .75em; }
+
+/* Third-Party Authentication */
+.google-signup-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #ffffff;
+  color: #1a1c23;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.google-signup-btn:hover {
+  background-color: #f8fafc;
+}
+
+.login-redirect-text {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #1a1c23;
+}
+
+.login-redirect-text a {
+  color: #1b66ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-redirect-text a:hover {
+  text-decoration: underline;
+}
+
+
+/* --- Right Column (Hero & Features Display) --- */
+.signup-right-col {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+
+  /* Styled fallback gradient matching the image canvas mood */
+  background: linear-gradient(135deg, #eef4fc 0%, #dbe7f6 40%, #cadbf0 100%);
+  background-size: cover;
+  background-position: center;
+
+  /* Inject illustration asset here when ready: */
+  /* background: url('/path-to-your-truck-road-illustration.png') no-repeat center center/cover; */
+}
+
+/* Beautiful curved panel containing feature highlights */
+.overlay-features-panel {
+  background-color: #ffffff;
+  width: 85%;
+  max-width: 440px;
+  height: 75%;
+  max-height: 520px;
+  border-radius: 40px 0 0 40px;
+  box-shadow: -15px 0 40px rgba(0, 0, 0, 0.03);
+  padding: 50px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 36px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.feature-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Specific Context Accent Colorizations */
+.icon-blue { background-color: #edf2ff; }
+.icon-green { background-color: #f0fdf4; }
+.icon-purple { background-color: #f3e8ff; }
+
+.feature-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1c23;
+  margin: 0 0 6px 0;
+}
+
+.feature-info p {
+  font-size: 0.92rem;
+  color: #1a1c23;
+  line-height: 1.4;
+  margin: 0;
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1024px) {
+  .signup-left-col {
+    flex: 0 0 50%;
+    padding: 40px;
+  }
+  .overlay-features-panel {
+    width: 95%;
+    padding: 40px 24px;
+  }
+}
+
+@media (max-width: 850px) {
+  /* Collapse layout into a sleek clean column on mobile views */
+  .signup-container {
+    flex-direction: column;
+  }
+  .signup-left-col {
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+  .signup-right-col {
+    display: none; /* Safely hide illustrative columns for optimized mobile performance */
+  }
+}
