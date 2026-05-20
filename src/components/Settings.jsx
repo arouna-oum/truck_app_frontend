@@ -1,5 +1,8 @@
 import '../css/Settings.css';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from 'axios';
+import axiosInstance from '../axios';
+import { userService, userSubject, setUserLogo } from '../userStore';
 
 const Toggle = ({ on }) => {
   const [active, setActive] = useState(on);
@@ -24,6 +27,81 @@ const compliance = [
 ];
 
 export default function Settings() {
+    const API_URL = import.meta.env.VITE_API_URL;
+    const [user, setUser] = useState(null);
+    const get_user_from_local_storage = () => {
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        console.log("User data Loaded 2: ", user_val);
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+    }
+    const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
+        username: '',
+        email: '',
+        phone: '',
+        refresh: '',
+        access: ''
+    });
+    const open_edit = (user) => {
+        console.log("the modif user is ", user);
+        setFormData({
+            first_name: user.first_name || "",
+            last_name: user.last_name || "",
+            username: user.username || "",
+            email: user.email || "",
+            phone: user.phone || ""
+        });
+    };
+
+    const handleSubmit = async (e)  => {
+        e.preventDefault();
+        // Handle login logic here
+        const user_val = localStorage.getItem('user');
+        console.log('user_val up with:', user_val);
+        if(user_val){
+            const v = JSON.parse(user_val);
+            console.log('v up with:', v);
+            formData.refresh = v.refresh;
+            formData.access = v.access;
+        }
+        console.log('Signing up with:', formData);
+        try {
+            const res = await axiosInstance.patch("user/account/"+user.id+"/", formData);
+            console.log("The response given is ", res.data);
+            setUserLogo(res.data);
+            // localStorage.setItem('user', JSON.stringify(res.data));
+            // setUser Behavior start
+            const user_val = localStorage.getItem('user');
+            if(user_val){
+                userSubject.next(JSON.parse(user_val));
+                console.log("User data Loaded:", userService.getUser());
+                get_user_from_local_storage();
+            }else{
+                console.log("No user data Loaded:", user_val);
+            }
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    };
+
+    useEffect(() => {
+        console.log("Component has initialized Trips!");
+        get_user_from_local_storage();
+    }, []);
+    useEffect(() => {
+
+        if(user){
+            open_edit(user);
+        }
+
+    }, [user]);
   return (
     <div className="settings-page">
       <div className="settings-topbar">
@@ -31,39 +109,93 @@ export default function Settings() {
       </div>
 
       <div className="settings-grid">
-        <div className="settings-card">
+        <form onSubmit={handleSubmit} className="settings-card">
           <div className="settings-card-header">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Profile
           </div>
           <div className="profile-avatar-row">
-            <div className="profile-avatar">JD</div>
-            <div>
-              <div className="profile-name">John Driver</div>
-              <div className="profile-email">john@truckroute.com</div>
+            {user && (
+                <div>
+                    <div className="profile-avatar">
+                        <img src={user?.profile_picture || user?.google_picture_url} className="avatar-circle"
+                                    alt="Avatar" loading="lazy"/>
+                    </div>
+                    <div>
+                        <div className="profile-name">{user?.first_name} {user?.last_name}</div>
+                        <div className="profile-email">{user?.email}</div>
+                    </div>
+                </div>
+            )}
+          </div>
+          <div className="field">
+            <label className="field-label">First name</label>
+            <div className="field-value">
+                <div className="field-input-wrap">
+                    <input
+                    type="text"
+                    placeholder="First name"
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                    required/>
+                </div>
             </div>
           </div>
           <div className="field">
-            <label className="field-label">Full name</label>
-            <div className="field-value">John Driver</div>
+            <label className="field-label">Last Name</label>
+            <div className="field-value">
+                <div className="field-input-wrap">
+                    <input
+                    type="text"
+                    placeholder="Last name"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                    required/>
+                </div>
+            </div>
           </div>
           <div className="field">
-            <label className="field-label">CDL number</label>
-            <div className="field-value">TX-482192</div>
+            <label className="field-label">Username</label>
+            <div className="field-value">
+                <div className="field-input-wrap">
+                    <input
+                    type="text"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    required/>
+                </div>
+            </div>
           </div>
           <div className="field">
-            <label className="field-label">HOS cycle</label>
-            <div className="field-value field-select">
-              <span>70 hr / 8 days</span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+            <label className="field-label">Email</label>
+            <div className="field-value">
+                <div className="field-input-wrap">
+                    <input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    required/>
+                </div>
             </div>
           </div>
           <div className="field">
             <label className="field-label">Phone</label>
-            <div className="field-value">+237 672 458 060</div>
+            <div className="field-value">
+                <div className="field-input-wrap">
+                <input
+                    type="number"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    required/>
+                </div>
+
+            </div>
           </div>
-          <button className="btn-save">Save changes</button>
-        </div>
+          <button className="btn-save" type='submit'>Save changes</button>
+        </form>
 
         <div className="settings-right">
           <div className="settings-card">

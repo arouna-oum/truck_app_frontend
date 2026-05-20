@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Link, Outlet } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import axios from 'axios';
+import axiosInstance from '../axios';
 import '../css/Dashboard.css'
 
 const Icons = {
@@ -30,6 +32,48 @@ const tripsData = [
 ];
 
 function Dashboard(){
+    const navigation = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL;
+    const [user, setUser] = useState(null);
+    const get_user_from_local_storage = () => {
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        console.log("User data Loaded 2: ", user_val);
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+    }
+
+    const view_all_trips = () => {
+        navigation('/sidebar/trips')
+    }
+
+    const [all_trips, setAllTrips] = useState([]);
+    const get_all_trips = async (e) => {
+        try {
+            const res = await axiosInstance.get("trip/all_trips/" + user?.id + "/");
+            console.log("The response given is ", res.data);
+            setAllTrips(res.data);
+            console.log("Right now the trips are ", all_trips);
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    }
+    useEffect(() => {
+        console.log("Component has initialized Trips!");
+
+        get_user_from_local_storage();
+    }, []);
+    useEffect(() => {
+
+        if(user){
+            get_all_trips();
+        }
+
+    }, [user]);
     return (
         // <Outlet/>
         <div className="Dashboard">
@@ -74,13 +118,13 @@ function Dashboard(){
                 <section className="trips-panel">
                 <div className="panel-header">
                     <h2>Recent Trips</h2>
-                    <a href="#all-trips" className="action-link">View All</a>
+                    <button onClick={()=>view_all_trips()} className="btn btn-primary w-25 action-link">View All</button>
                 </div>
                 <div className="scrollable-table-wrapper">
                     <table className="custom-data-table">
                     <thead>
                         <tr>
-                        <th>Trip ID</th>
+                        <th>Tractor Number</th>
                         <th>Route</th>
                         <th>Date</th>
                         <th>Distance</th>
@@ -88,11 +132,16 @@ function Dashboard(){
                         </tr>
                     </thead>
                     <tbody>
-                        {tripsData.map((trip) => (
+                        {all_trips?.slice(-5).map((trip, index) => (
                         <tr key={trip.id}>
-                            <td className="font-mono text-dark">{trip.id}</td>
-                            <td className="text-secondary">{trip.route}</td>
-                            <td>{trip.date}</td>
+                            <td className="font-mono text-dark">{trip.tractor_number}</td>
+                            <td className="text-secondary">{trip.origin} → {trip.destination}</td>
+                            <td>{new Date(trip.departure_date)
+                                .toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric"
+                                })}</td>
                             <td>{trip.distance}</td>
                             <td>
                             <span className={`status-tag ${trip.status.toLowerCase().replace(' ', '-')}`}>

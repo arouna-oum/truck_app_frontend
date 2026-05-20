@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import axiosInstance from "../axios";
 import TripDetails from "./TripDetails";
+import { Link, useNavigate } from "react-router-dom";
 import "../css/Trips.css";
 
 const cargoTypes = [
@@ -16,13 +18,7 @@ const drivers = ["John Driver", "Maria Lopez", "James Kim"];
 const cycles = ["70 hr / 8 days", "60 hr / 7 days"];
 
 const STEPS = ["Route", "Details", "Review"];
-const trips = [
-  { id: "TRP-1001", route: "Dallas, TX → Chicago, IL", driver: "John Driver", date: "May 18, 2026", distance: "1,032 mi", status: "Completed" },
-  { id: "TRP-1002", route: "Houston, TX → Atlanta, GA", driver: "Maria Lopez", date: "May 17, 2026", distance: "810 mi", status: "Completed" },
-  { id: "TRP-1003", route: "Phoenix, AZ → Denver, CO", driver: "James Kim", date: "May 16, 2026", distance: "602 mi", status: "In Progress" },
-  { id: "TRP-1004", route: "Los Angeles, CA → Seattle, WA", driver: "John Driver", date: "May 15, 2026", distance: "1,256 mi", status: "Planned" },
-  { id: "TRP-1005", route: "Miami, FL → Nashville, TN", driver: "Maria Lopez", date: "May 14, 2026", distance: "879 mi", status: "Planned" },
-];
+
 
 const statusClass = { completed: "badge-done", "in_transit": "badge-prog", pending: "badge-plan", cancelled: "badge-cancel" };
 
@@ -36,12 +32,13 @@ const stats = [
 
 export default function Trips() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [editTrip, setEditTrip] = useState(null);
   const [active, setActive] = useState("All");
   const [filters, setFilters] = useState(["All"]);
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    assigned_driver: "",
+    assigned_driver_id: "",
     co_driver: undefined,
     driver_number: "",
     tractor_number: "",
@@ -53,13 +50,14 @@ export default function Trips() {
     shipper_name: "",
     load_number: "",
     hos_cycle: "",
+    status: "",
   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const canNext = () => {
     if (step === 0) return form.origin.trim() && form.destination.trim() && form.tractor_number;
-    if (step === 1) return form.departure_date && form.cargo_type;
+    if (step === 1) return form.departure_date && form.cargo_type && form.assigned_driver_id && form.hos_cycle;
     return true;
   };
 
@@ -77,7 +75,7 @@ export default function Trips() {
     // Requests start
     const get_status_choices = async (e) => {
         try {
-            const res = await axios.get(API_URL+"trip/status_choices/")
+            const res = await axiosInstance.get("trip/status_choices/")
             console.log("The response given is ", res.data);
             setStatus(res.data['status_choices']);
             setFilters(filters.concat(res.data['status_choices']));
@@ -101,7 +99,7 @@ export default function Trips() {
 
     const get_all_trips = async (e) => {
         try {
-            const res = await axios.get(API_URL+"trip/trip_actions/"+user?.id+"/");
+            const res = await axiosInstance.get("trip/trip_actions/" + user?.id + "/");
             console.log("The response given is ", res.data);
             setAllTrips(res.data.results);
             console.log("Right now the trips are ", all_trips);
@@ -112,7 +110,7 @@ export default function Trips() {
 
     const get_cargo_choices = async (e) => {
         try {
-            const res = await axios.get(API_URL+"trip/cargo_type_choices/")
+            const res = await axiosInstance.get("trip/cargo_type_choices/")
             console.log("The response given is ", res.data);
             setCargos(res.data['cargo_type_choices']);
             console.log("Right now the cargo_types are ", cargo_types);
@@ -123,7 +121,7 @@ export default function Trips() {
 
     const get_hos_choices = async (e) => {
         try {
-            const res = await axios.get(API_URL+"trip/hos_choices/")
+            const res = await axiosInstance.get("trip/hos_choices/")
             console.log("The response given is ", res.data);
             setHOS(res.data['hos_choices']);
             console.log("Right now the hos_types are ", hos_types);
@@ -134,7 +132,7 @@ export default function Trips() {
 
     const get_user_list = async () => {
         try {
-            const res = await axios.get(API_URL+"user/all_users/")
+            const res = await axiosInstance.get("user/all_users/")
             console.log("The response given is ", res.data);
             setUsers(res.data);
             console.log("Right now the hos_types are ", hos_types);
@@ -147,17 +145,85 @@ export default function Trips() {
         // Handle login logic here
 
         console.log('Creating Trip up with:', form);
-        form.co_driver = form.co_driver || null;
+        form.co_driver_id = form.co_driver_id || null;
+        // try {
+        //     const res = await axios.post(API_URL+"trip/trip_actions/", form);
+        //     console.log("The response given is ", res.data);
+        //     setShowModal(false);
+        //     // setUserLogo(res.data);
+        //     // localStorage.setItem('user', JSON.stringify(res.data));
+        // } catch (error) {
+        //     console.log("An error occured here ", error);
+        // }
         try {
-            const res = await axios.post(API_URL+"trip/trip_actions/", form);
-            console.log("The response given is ", res.data);
+            if (editTrip) {
+                // Edit mode — PUT request
+                const res = await axiosInstance.put("trip/trip_actions/" + editTrip.id + "/", form);
+                console.log("Trip updated:", res.data);
+                setSuccessMessageModify(true);
+                setErrorMessage(false);
+
+                setTimeout(() => {
+                    setSuccessMessageModify(false);
+                }, 4000);
+            } else {
+                // Create mode — POST request
+                const res = await axiosInstance.post("trip/trip_actions/", form);
+                console.log("Trip created:", res.data);
+                setSuccessMessageCreate(true);
+                setErrorMessage(false);
+
+                setTimeout(() => {
+                    setSuccessMessageCreate(false);
+                }, 4000);
+            }
             setShowModal(false);
-            // setUserLogo(res.data);
-            // localStorage.setItem('user', JSON.stringify(res.data));
+            setEditTrip(null);
+            get_all_trips(); 
         } catch (error) {
-            console.log("An error occured here ", error);
+            console.log("An error occurred:", error);
+
+            setErrorMessage(true);
+            setSuccessMessageModify(false);
+            setSuccessMessageCreate(false);
+
+            setTimeout(() => {
+                setErrorMessage(false);
+            }, 4000);
         }
     };
+
+    const navigate = useNavigate();
+    const view_trip = (trip) => {
+        navigate('/sidebar/view_trip', {
+            state: { trip }
+        });
+    }
+
+    const open_edit = (trip) => {
+        console.log("the modif trips are ", trip);
+        setForm({
+            assigned_driver_id: trip.assigned_driver.id || "",
+            co_driver_id: trip.co_driver?.id || "",
+            driver_number: trip.driver_number || "",
+            tractor_number: trip.tractor_number || "",
+            origin: trip.origin || "",
+            destination: trip.destination || "",
+            departure_date: trip.departure_date || "",
+            departure_time: trip.departure_time || "",
+            cargo_type: trip.cargo_type || "",
+            shipper_name: trip.shipper_name || "",
+            load_number: trip.load_number || "",
+            hos_cycle: trip.hos_cycle || "",
+            status: trip.status || "",
+        });
+        setEditTrip(trip);
+        setStep(0);
+        setShowModal(true);
+    };
+    const [successMessageCreate, setSuccessMessageCreate] = useState(false);
+    const [successMessageModify, setSuccessMessageModify] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(false);
 
     // Requests end
     useEffect(() => {
@@ -179,7 +245,18 @@ export default function Trips() {
     <div className="trips-page">
       <div className="trips-topbar">
         <h1 className="trips-title">Trips</h1>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn-primary w-25" 
+        onClick={() => {
+        setEditTrip(null);
+        setForm({
+            assigned_driver_id: "", co_driver_id: "", driver_number: "",
+            tractor_number: "", origin: "", destination: "",
+            departure_date: "", departure_time: "", cargo_type: "",
+            shipper_name: "", load_number: "", hos_cycle: "",
+        });
+        setStep(0);
+        setShowModal(true);
+        }}>
           <span className="btn-icon">+</span> Plan new trip
         </button>
       </div>
@@ -200,7 +277,7 @@ export default function Trips() {
                     <div className="modal-header-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.2"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
                     </div>
-                    <span className="modal-title">Plan new trip</span>
+                    <span className="modal-title">{editTrip ? "Edit trip" : "Plan new trip"}</span>
                 </div>
                 <button className="modal-close" onClick={() => setShowModal(false)} aria-label="Close">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -321,7 +398,7 @@ export default function Trips() {
                     {cargo_types.map(c => (
                         <button
                         key={c.value}
-                        className={`cargo-btn ${form.cargo_type === c.label ? "cargo-active" : ""}`}
+                        className={`cargo-btn ${form.cargo_type === c.label || form.cargo_type === c.value ? "cargo-active" : ""}`}
                         onClick={() => set("cargo_type", c.value)}
                         type="button"
                         >
@@ -336,9 +413,11 @@ export default function Trips() {
                     <div className="field">
                         <label className="field-label">Assign Driver</label>
                         <div className="field-input-wrap select-wrap">
-                            <select value={form.assigned_driver} onChange={e => set("assigned_driver", e.target.value)}>
+                            <select value={form.assigned_driver_id} onChange={e => set("assigned_driver_id", e.target.value)}>
                             <option value="">Select Assign Driver</option>
-                            {user_list.map(d => <option key={d.id} value={d.id}>{d.username}</option>)}
+                            {user_list.map(d => <option key={d.id} value={d.id || form.assigned_driver_id}>
+                                {d.username}
+                            </option>)}
                             </select>
                             <svg className="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.2"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
@@ -346,9 +425,11 @@ export default function Trips() {
                     <div className="field">
                         <label className="field-label">Co Driver</label>
                         <div className="field-input-wrap select-wrap">
-                            <select value={form.co_driver} onChange={e => set("co_driver", e.target.value)}>
+                            <select value={form.co_driver_id} onChange={e => set("co_driver_id", e.target.value)}>
                             <option value="">Select Co Driver</option>
-                            {user_list.map(d => <option key={d.id} value={d.id}>{d.username}</option>)}
+                            {user_list.map(d => <option key={d.id} value={d.id || form.co_driver_id}>
+                                {d.username}
+                            </option>)}
                             </select>
                             <svg className="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.2"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
@@ -360,11 +441,26 @@ export default function Trips() {
                     <div className="field-input-wrap select-wrap">
                         <select value={form.hos_cycle} onChange={e => set("hos_cycle", e.target.value)}>
                         <option value="">Select HOS Cycle</option>
-                        {hos_types.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                        {hos_types.map(c => <option key={c.value} value={c.value || c.hos_cycle}>
+                            {c.label}
+                        </option>)}
                         </select>
                         <svg className="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.2"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                 </div>
+
+                {editTrip && (<div className="field">
+                    <label className="field-label">Status</label>
+                    <div className="field-input-wrap select-wrap">
+                        <select value={form.status} onChange={e => set("status", e.target.value)}>
+                        <option value="">Select Status</option>
+                        {statuses.map(c => <option key={c.value} value={c.value || c.status}>
+                            {c.label}
+                        </option>)}
+                        </select>
+                        <svg className="select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                </div>)}
 
                 <div className="form-row">
                     <div className="field">
@@ -426,7 +522,7 @@ export default function Trips() {
                     </div>
                     <div className="review-row">
                     <span className="review-label">Assigned Driver</span>
-                    <span className="review-value">{form.assigned_driver}</span>
+                    <span className="review-value">{form.assigned_driver_id}</span>
                     </div>
                     <div className="review-row">
                     <span className="review-label">HOS Cycle</span>
@@ -440,10 +536,10 @@ export default function Trips() {
                     <span className="review-label">Load Number</span>
                     <span className="review-value">{form.load_number}</span>
                     </div>
-                    {form.co_driver && (
+                    {form.co_driver_id && (
                     <div className="review-row">
                         <span className="review-label">Co-Driver</span>
-                        <span className="review-value">{form.co_driver}</span>
+                        <span className="review-value">{form.co_driver_id}</span>
                     </div>
                     )}
                 </div>
@@ -459,7 +555,14 @@ export default function Trips() {
             <div className="modal-footer">
                 <button
                     className="btn-back"
-                    onClick={() => step === 0 ? setShowModal(false) : setStep(s => s - 1)}
+                    onClick={() => {
+                        if (step === 0) {
+                            setShowModal(false);
+                            setEditTrip(null);
+                        } else {
+                            setStep(s => s - 1);
+                        }
+                    }}
                 >
                     {step === 0
                     ? "Cancel"
@@ -474,7 +577,7 @@ export default function Trips() {
                     disabled={!canNext()}
                     >
                     {step === STEPS.length - 1
-                        ? <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> Create trip</>
+                        ? <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> {editTrip ? "Edit trip" : "Create trip"}</>
                         : <>Continue <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></>
                     }
                     </button>
@@ -516,11 +619,12 @@ export default function Trips() {
           <table className="trips-table">
             <thead>
               <tr>
-                <th>Trip ID</th>
+                <th>Tractor Number</th>
                 <th>Route</th>
                 <th>Date</th>
                 <th>Distance</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -536,14 +640,36 @@ export default function Trips() {
                     })}</td>
                   <td>{t.distance} miles</td>
                   <td><span className={`badge ${statusClass[t.status]}`}>{t.status}</span></td>
+                  <td className="buttonsarr">
+                    <button className="btn btn-secondary btn-sm" onClick={() => view_trip(t)}><i className="bi bi-eye"></i></button>
+                    <button className="btn colr btn-sm" onClick={() => open_edit(t)}><i className="bi bi-pencil"></i></button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+            <br />
+            <br />
+            {successMessageCreate && (
+                <div className="info-note info-success allin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Trip was successfully modified.
+                </div>
+            )}
+            {successMessageModify && (
+                <div className="info-note info-success allin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Trip was successfully created.
+                </div>
+            )}
+            {errorMessage && (
+                <div className="info-note info-danger allin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="red" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    An Error occured, verify your internet connection and try again.
+                </div>
+            )}
         </div>
       </div>
-
-        <TripDetails trip={all_trips[1]}></TripDetails>
 
     </div>
   );

@@ -21,9 +21,12 @@ function Header(){
         }
         const subscription = userSubject.subscribe((newUser) => {
             console.log("Header received new user update:", newUser);
-            setUser(newUser);
-            const newList = navItems.filter(item => item !== "Login");
-            setNavItems(newList);
+            if(newUser){
+                setUser(newUser);
+                const newList = navItems.filter(item => item !== "Login");
+                setNavItems(newList);
+            }
+           
         });
         console.log("User data Loaded:", user);
         // Optional: Return a function for cleanup (like ngOnDestroy)

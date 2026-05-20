@@ -1,6 +1,8 @@
 import '../css/Logs.css';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from "axios";
+import axiosInstance from "../axios";
 
 const hours = Array.from({ length: 12 }, (_, i) => i * 2);
 const hourLabels = ["12A","2","4","6","8","10","12P","2","4","6","8","10"];
@@ -12,15 +14,11 @@ const statusColors = {
   "On duty": "#4ade80",
 };
 
-const history = [
-  { id: "TRP-1001", route: "Dallas, TX → Chicago, IL", status: "No violations", ok: true, date: "May 18" },
-  { id: "TRP-1002", route: "Houston, TX → Atlanta, GA", status: "No violations", ok: true, date: "May 17" },
-  { id: "TRP-1003", route: "Phoenix, AZ → Denver, CO", status: "No violations", ok: true, date: "May 16" },
-  { id: "TRP-999",  route: "Dallas, TX → Memphis, TN", status: "1 violation", ok: false, date: "May 10" },
-];
-
 export default function Logs() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const location = useLocation();
+
+  const trip = location.state?.trip;
   const [user, setUser] = useState(null);
   const [eld_trip, setEldTrip] = useState(null);
     const get_user_from_local_storage = () => {
@@ -36,7 +34,7 @@ export default function Logs() {
     }
   const get_trip_eld = async () => {
         try {
-            const res = await axios.get(API_URL+"eld/generate-logs/"+3+"/");
+            const res = await axiosInstance.get("eld/generate-logs/" + trip.id + "/");
             console.log("The response given is ", res.data);
             setEldTrip(res.data?.eld);
             console.log("Right now the hos_types are ", eld_trip);
@@ -44,6 +42,19 @@ export default function Logs() {
             console.log("An error occured here ", error);
         }
     }
+
+    const [all_trips, setAllTrips] = useState([]);
+    const get_all_trips = async (e) => {
+        try {
+            const res = await axiosInstance.get("trip/trip_actions/" + user?.id + "/");
+            console.log("The response given is ", res.data);
+            setAllTrips(res.data.results);
+            console.log("Right now the trips are ", all_trips);
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    }
+
     useEffect(() => {
         console.log("Component has initialized Trips!");
         get_user_from_local_storage();
@@ -52,6 +63,7 @@ export default function Logs() {
 
         if(user){
             get_trip_eld();
+            get_all_trips();
         }
 
     }, [user]);
@@ -104,10 +116,10 @@ export default function Logs() {
     <div className="logs-page">
       <div className="logs-topbar">
         <h1 className="logs-title">ELD Logs</h1>
-        <button className="btn-export">
+        {/* <button className="btn-export">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Export logs
-        </button>
+        </button> */}
       </div>
 
       <div className="logs-card">
@@ -153,12 +165,17 @@ export default function Logs() {
           <span className="card-title">Log history</span>
         </div>
         <div className="log-list">
-          {history.map(h => (
+          {all_trips.map(h => (
             <div key={h.id} className="log-row">
               <span className="log-id">{h.id}</span>
-              <span className="log-route">{h.route}</span>
+              <span className="log-route">{h.origin} -{">"} {h.destination}</span>
               <span className={`badge ${h.ok ? "badge-ok" : "badge-vio"}`}>{h.status}</span>
-              <span className="log-date">{h.date}</span>
+              <span className="log-date">{new Date(h.departure_date)
+                    .toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    })}</span>
             </div>
           ))}
         </div>

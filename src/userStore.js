@@ -1,6 +1,9 @@
 import { BehaviorSubject } from 'rxjs';
+import { jwtDecode } from "jwt-decode";
+import axios from 'axios';
 
 // Acts exactly like an Angular BehaviorSubject
+
 export let userSubject = new BehaviorSubject(null);
 const API_URL = import.meta.env.VITE_API_URL;
 export const userService = {
@@ -40,3 +43,75 @@ export function setUserLogo(finalForm) {
     }
     localStorage.setItem('user', JSON.stringify(finalForm));
 }
+
+    export const isTokenExpired = () => {
+        const user = localStorage.getItem("user");
+
+        if (!user) return true;
+
+        try {
+            const parsed = JSON.parse(user);
+            const access = parsed?.access;
+
+            if (!access) return true;
+
+            const decoded = jwtDecode(access);
+
+            return decoded.exp < Date.now() / 1000;
+
+        } catch {
+            return true;
+        }
+    };
+
+    export const refreshToken = async () => {
+        const user = localStorage.getItem("user");
+
+        if (!user) return null;
+
+        const parsed = JSON.parse(user);
+
+        try {
+            const res = await axios.post(
+                API_URL + "api/token/refresh/",
+                { refresh: parsed.refresh }
+            );
+
+            const updatedUser = {
+                ...parsed,
+                access: res.data.access
+            };
+
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+
+            return res.data.access;
+
+        } catch (error) {
+
+            localStorage.clear();
+
+            window.location.href = "/login";
+
+            return null;
+        }
+    };
+
+    export const controlOnrefresh = async () => {
+        const user = localStorage.getItem("user");
+
+        if (!user) return;
+
+        const parsed = JSON.parse(user);
+
+        const expired = isTokenExpired();
+
+        if (expired) {
+            console.log("Access token expired → refreshing");
+
+            const newAccess = await refreshToken();
+
+            return newAccess;
+        }
+
+        return parsed.access;
+    };

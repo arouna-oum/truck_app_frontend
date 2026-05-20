@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { userService, userSubject } from '../userStore';
+import axiosInstance from '../axios';
 import '../css/Sidebar.css'
 
 const Icons = {
@@ -29,7 +31,79 @@ const tripsData = [
   { id: 'TRP-1004', route: 'Los Angeles, CA → Seattle, WA', date: 'May 15, 2026', distance: '1,256 mi', status: 'Planned' },
 ];
 
+
+
 function Sidebar(){
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+    const handleLogout = async ()  => {
+        console.log('Signing up with:', user);
+        try {
+            const refresh = {
+                'refresh_token': user.refresh
+            }
+            const res = await axiosInstance.post("user/logout/", refresh);
+            console.log("The response given is ", res.data);
+            localStorage.clear();
+            userSubject.next(null);
+            userService.setUser(null);
+            navigate('/');
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    };
+    const get_user_from_local_storage = () => {
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        console.log("User data Loaded 2: ", user_val);
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+    }
+
+    const [all_trips, setAllTrips] = useState([]);
+    const get_all_trips = async (e) => {
+        try {
+            const res = await axios.get(API_URL+"trip/all_trips/"+user?.id+"/");
+            console.log("The response given is ", res.data);
+            setAllTrips(res.data.results);
+            console.log("Right now the trips are ", all_trips);
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    }
+    useEffect(() => {
+        console.log("Component has initialized Trips!");
+        // This code runs once on mount (like ngOnInit)
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            userService.setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+        const subscription = userSubject.subscribe((newUser) => {
+            console.log("Header received new user update:", newUser);
+            setUser(newUser);
+        });
+        console.log("User data Loaded:", user);
+        // Optional: Return a function for cleanup (like ngOnDestroy)
+        return () => {
+            console.log("Component is being destroyed!");
+            subscription.unsubscribe();
+        };
+    }, []);
+    useEffect(() => {
+
+        if(user){
+            get_all_trips();
+        }
+
+    }, [user]);
     const [isCollapsed, setIsCollapsed] = useState(false);
     return (
         // <Outlet/>
@@ -53,7 +127,7 @@ function Sidebar(){
                         <NavLink to="drivers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Drivers /> <span>Drivers</span></NavLink>
                         <NavLink to="reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Reports /> <span>Reports</span></NavLink>
                         <NavLink to="settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Settings /> <span>Settings</span></NavLink>
-                        <NavLink to="logout" className={({ isActive }) => `nav-item logout ${isActive ? 'active' : ''}`}><Icons.Logout /> <span>Logout</span></NavLink>
+                        <NavLink onClick={() => handleLogout()} to="logout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}><Icons.Logout /> <span>Logout</span></NavLink>
                     </nav>
                 </aside>
 
@@ -73,9 +147,18 @@ function Sidebar(){
                             <span className="notification-badge"></span>
                             </button>
                             <div className="profile-dropdown">
-                            <div className="avatar-circle">JD</div>
-                            <span className="profile-name">John Driver</span>
-                            <Icons.ChevronDown />
+                                {user && (
+                                    <div className="profile-dropdown">
+                                        <div className="avatar-circle">
+                                            <img src={user?.profile_picture || user?.google_picture_url} className="avatar-circle"
+                                                        alt="Avatar" loading="lazy"/>
+                                        </div>
+                                        <div>
+                                            <div className="profile-name">{user?.username}</div>
+                                        </div>
+                                        <Icons.ChevronDown />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </header>

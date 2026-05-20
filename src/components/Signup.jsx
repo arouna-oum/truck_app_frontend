@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Signup.css';
 import axios from 'axios';
+import axiosInstance from '../axios';
 
 function Signup() {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ function Signup() {
         }
         console.log('Signing up with:', formData);
         try {
-            const res = await axios.post(API_URL+"user/account/", formData);
+            const res = await axiosInstance.post("user/account/", formData);
             console.log("The response given is ", res.data);
             navigate('/login');
         } catch (error) {

@@ -1,6 +1,36 @@
 import '../css/Home.css'
+import React, { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import axios from 'axios';
 
 function Home(){
+    const navigation = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL;
+    const [user, setUser] = useState(null);
+    const get_user_from_local_storage = () => {
+        console.log("Component has initialized!");
+        const user_val = localStorage.getItem('user');
+        console.log("User data Loaded 2: ", user_val);
+        if(user_val){
+            console.log("User data Loaded 2: ", user_val);
+            setUser(JSON.parse(user_val));
+        }else{
+            console.log("No user data Loaded:", user);
+        }
+    }
+    useEffect(() => {
+        console.log("Component has initialized Trips!");
+
+        get_user_from_local_storage();
+    }, []);
+    const view_dashboard = () => {
+        if(user){
+            navigation('/sidebar/dashboard')
+        }else{
+            navigation('/login')
+        }
+
+    }
     return (
         <div className="Home page mt-0">
             <section className="hero">
@@ -14,7 +44,7 @@ function Home(){
                     Plan your trips, optimize routes, and generate ELD logs automatically with ease.
                     </p>
                     <div className="hero-buttons">
-                    <button className="btn-primary">Get Started</button>
+                    <button className="btn-primary" onClick={() => view_dashboard()}>Get Started</button>
                     <button className="btn-secondary">Learn More →</button>
                     </div>
                 </div>

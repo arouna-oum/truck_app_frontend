@@ -14,6 +14,8 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Logout from './components/Logout';
 import Sidebar from './components/Sidebar';
+import TripDetails from './components/TripDetails';
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
 
@@ -23,9 +25,15 @@ function App() {
             <Route path="/" element={<Navigate to="/home" replace />}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/signup" element={<Signup/>}/>
-            <Route path="/sidebar" element={<Sidebar/>}>
+            <Route path="/sidebar" element=
+            {
+              <ProtectedRoute>
+                <Sidebar/>
+              </ProtectedRoute>
+            }>
               <Route path="dashboard" element={<Dashboard/>} />
               <Route path="trips" element={<Trips/>} />
+              <Route path="view_trip" element={<TripDetails/>} />
               <Route path="logs" element={<Logs/>} />
               <Route path="drivers" element={<Drivers/>} />
               <Route path="reports" element={<Reports/>} />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../css/Login.css';
 import { userService, userSubject, setUserLogo } from '../userStore';
 import axios from 'axios';
+import axiosInstance from '../axios';
 
 function Login(){
     const API_URL = import.meta.env.VITE_API_URL;
@@ -15,7 +16,7 @@ function Login(){
 
         console.log('Signing up with:', formData);
         try {
-            const res = await axios.post(API_URL+"user/login/", formData);
+            const res = await axiosInstance.post("user/login/", formData);
             console.log("The response given is ", res.data);
             setUserLogo(res.data);
             // localStorage.setItem('user', JSON.stringify(res.data));
