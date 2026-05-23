@@ -34,6 +34,7 @@ const tripsData = [
 
 
 function Sidebar(){
+    const API_URL = import.meta.env.VITE_API_URL;
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
     const handleLogout = async ()  => {
@@ -42,7 +43,7 @@ function Sidebar(){
             const refresh = {
                 'refresh_token': user.refresh
             }
-            const res = await axiosInstance.post("user/logout/", refresh);
+            const res = await axiosInstance.post(API_URL+"user/logout/", refresh);
             console.log("The response given is ", res.data);
             localStorage.clear();
             userSubject.next(null);
@@ -67,7 +68,7 @@ function Sidebar(){
     const [all_trips, setAllTrips] = useState([]);
     const get_all_trips = async (e) => {
         try {
-            const res = await axios.get(API_URL+"trip/all_trips/"+user?.id+"/");
+            const res = await axiosInstance.get(API_URL+"trip/all_trips/"+user?.id+"/");
             console.log("The response given is ", res.data);
             setAllTrips(res.data.results);
             console.log("Right now the trips are ", all_trips);
@@ -110,10 +111,10 @@ function Sidebar(){
         <div className="Dashboard">
             <div className="dashboard-layout">
                 {/* Backdrop for mobile overlays */}
-                {!isCollapsed && <div className="sidebar-backdrop" onClick={() => setIsCollapsed(true)}></div>}
+                {isCollapsed && <div className="sidebar-backdrop" onClick={() => setIsCollapsed(false)}></div>}
 
                 {/* Sidebar Navigation */}
-                <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+                <aside className={`sidebar ${!isCollapsed ? 'collapsed' : ''}`}>
                     <div className="brand-header">
                     <NavLink className="brand-logo-wrapper" to="/">
                         <Icons.TruckLogo />
@@ -156,7 +157,7 @@ function Sidebar(){
                                         <div>
                                             <div className="profile-name">{user?.username}</div>
                                         </div>
-                                        <Icons.ChevronDown />
+                                        {/* <Icons.ChevronDown /> */}
                                     </div>
                                 )}
                             </div>

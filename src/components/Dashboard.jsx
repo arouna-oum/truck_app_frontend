@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, NavLink, useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import axiosInstance from '../axios';
 import '../css/Dashboard.css'
@@ -35,6 +35,8 @@ function Dashboard(){
     const navigation = useNavigate();
     const API_URL = import.meta.env.VITE_API_URL;
     const [user, setUser] = useState(null);
+    const [all_trips_details, setAllTripsDetails] = useState([]);
+
     const get_user_from_local_storage = () => {
         console.log("Component has initialized!");
         const user_val = localStorage.getItem('user');
@@ -62,6 +64,18 @@ function Dashboard(){
             console.log("An error occured here ", error);
         }
     }
+
+    const get_trip_details = async (e) => {
+        try {
+            const res = await axiosInstance.get("trip/trip_details/"+user?.id+"/")
+            console.log("The response given is ", res.data);
+            setAllTripsDetails(res.data);
+            console.log("Right now the trip details are ", all_trips_details);
+        } catch (error) {
+            console.log("An error occured here ", error);
+        }
+    }
+
     useEffect(() => {
         console.log("Component has initialized Trips!");
 
@@ -71,6 +85,7 @@ function Dashboard(){
 
         if(user){
             get_all_trips();
+            get_trip_details();
         }
 
     }, [user]);
@@ -82,34 +97,34 @@ function Dashboard(){
                 <div className="metric-icon bg-light-blue text-blue"><Icons.RouteMap /></div>
                 <div className="metric-details">
                     <span className="metric-label">Total Trips</span>
-                    <h3 className="metric-value">12</h3>
-                    <span className="metric-period">This Month</span>
+                    <h3 className="metric-value">{all_trips_details ? all_trips_details['total']:0}</h3>
+                    <span className="metric-period"></span>
                 </div>
                 </div>
                 <div className="metric-card">
                 <div className="metric-icon bg-light-green text-green"><Icons.Distance /></div>
                 <div className="metric-details">
                     <span className="metric-label">Total Distance</span>
-                    <h3 className="metric-value">5,430 mi</h3>
+                    <h3 className="metric-value">{all_trips_details ? all_trips_details['distance']:0} mi</h3>
                     <span className="metric-period">This Month</span>
                 </div>
                 </div>
-                <div className="metric-card">
+                {/* <div className="metric-card">
                 <div className="metric-icon bg-light-purple text-purple"><Icons.TimeClock /></div>
                 <div className="metric-details">
                     <span className="metric-label">Drive Time</span>
                     <h3 className="metric-value">80h 15m</h3>
                     <span className="metric-period">This Month</span>
                 </div>
-                </div>
-                <div className="metric-card">
-                <div className="metric-icon bg-light-orange text-orange"><Icons.Warning /></div>
-                <div className="metric-details">
-                    <span className="metric-label">Violations</span>
-                    <h3 className="metric-value text-orange-dark">2</h3>
-                    <span className="metric-period">This Month</span>
-                </div>
-                </div>
+                </div> */}
+                {/* <div className="metric-card">
+                    <div className="metric-icon bg-light-orange text-orange"><Icons.Warning /></div>
+                    <div className="metric-details">
+                        <span className="metric-label">Violations</span>
+                        <h3 className="metric-value text-orange-dark">2</h3>
+                        <span className="metric-period">This Month</span>
+                    </div>
+                </div> */}
             </section>
 
             {/* Bottom Row: Detailed Context Splits */}
@@ -117,8 +132,12 @@ function Dashboard(){
                 {/* Table Panel: Trips Record */}
                 <section className="trips-panel">
                 <div className="panel-header">
-                    <h2>Recent Trips</h2>
-                    <button onClick={()=>view_all_trips()} className="btn btn-primary w-25 action-link">View All</button>
+                    <div>
+                        <h2>Recent Trips</h2>
+                    </div>
+                    <div>
+                        <button onClick={()=>view_all_trips()} className="btn btn-primary action-link">View All</button>
+                    </div>
                 </div>
                 <div className="scrollable-table-wrapper">
                     <table className="custom-data-table">
@@ -193,12 +212,12 @@ function Dashboard(){
                     <h2>Quick Actions</h2>
                     </div>
                     <div className="action-buttons-group">
-                    <button className="btn-action-primary">
+                    <NavLink className="btn-action-primary" to="/sidebar/trips">
                         <Icons.Plus /> Plan New Trip
-                    </button>
-                    <button className="btn-action-secondary">
+                    </NavLink>
+                    {/* <button className="btn-action-secondary">
                         <Icons.Logs /> Generate ELD Log
-                    </button>
+                    </button> */}
                     </div>
                 </section>
                 </div>

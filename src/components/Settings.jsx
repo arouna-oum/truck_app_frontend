@@ -1,6 +1,5 @@
 import '../css/Settings.css';
 import { useState, useEffect } from "react";
-import axios from 'axios';
 import axiosInstance from '../axios';
 import { userService, userSubject, setUserLogo } from '../userStore';
 

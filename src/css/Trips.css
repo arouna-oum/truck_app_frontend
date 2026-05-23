@@ -119,6 +119,11 @@
     color: white !important;
 }
 
+.colr2{
+    background-color: red !important;
+    color: white !important;
+}
+
 .buttonsarr{
     display: flex;
     gap: 8px;
@@ -344,6 +349,76 @@
 }
 
 /* ── Fields ── */
+.allignItems{
+  display: flex !important;
+  flex-wrap: wrap;
+  width: 100% !important;
+  justify-content: center;
+}
+
+.btn-buttons-prev{
+    color: #257FD1;
+    font-size: small;
+    border: 1px solid #556481;
+    background-color: white;
+}
+
+.btn-buttons-prev:hover{
+    color: white;
+    border: 1px solid #556481;
+    background-color: #257FD1;
+}
+
+.btn-buttons-active{
+    color: white !important;
+    border: 1px solid #556481 !important;
+    background-color: #257FD1 !important;
+}
+
+.btn-buttons-notactives{
+    color: #6A7892 !important;
+    border: 1px solid #556481 !important;
+    background-color: white !important;
+}
+.btn-buttons-notactives:hover{
+    color: white;
+    font-size: small;
+    border: 1px solid #556481;
+    background-color: #257FD1;
+}
+
+.firstPage{
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border-right: none !important;
+    border: 1px solid #556481 !important;
+    padding: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.midPage{
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border: 1px solid #556481 !important;
+    padding: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.NextPage{
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-left: none !important;
+    font-size: small;
+}
+
 .field {
   display: flex;
   flex-direction: column;

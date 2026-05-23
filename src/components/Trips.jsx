@@ -56,7 +56,7 @@ export default function Trips() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const canNext = () => {
-    if (step === 0) return form.origin.trim() && form.destination.trim() && form.tractor_number;
+    if (step === 0) return form.origin.trim() && form.destination.trim() && form.tractor_number.trim() && form.driver_number.trim();
     if (step === 1) return form.departure_date && form.cargo_type && form.assigned_driver_id && form.hos_cycle && form.load_number;
     return true;
   };
@@ -111,9 +111,15 @@ export default function Trips() {
 
     const get_all_trips = async (e) => {
         try {
+            
             const res = await axiosInstance.get("trip/trip_actions/" + user?.id + "/");
             console.log("The response given is ", res.data);
-            setAllTrips(res.data.results);
+            setTotalNumberPage(res.data.count);
+            console.log("The response TotalNumberofPage given is ", TotalNumberofPage);
+            if(res.data.count>0){
+                setAllTrips(res.data.results);
+                loadPages(res.data.count);
+            }
             console.log("Right now the trips are ", all_trips);
         } catch (error) {
             console.log("An error occured here ", error);
@@ -147,7 +153,7 @@ export default function Trips() {
             const res = await axiosInstance.get("user/all_users/")
             console.log("The response given is ", res.data);
             setUsers(res.data);
-            console.log("Right now the hos_types are ", hos_types);
+            console.log("Right now the user_list are ", user_list);
         } catch (error) {
             console.log("An error occured here ", error);
         }
@@ -230,6 +236,8 @@ export default function Trips() {
             hos_cycle: trip.hos_cycle || "",
             status: trip.status || "",
         });
+        setUserName(trip.assigned_driver ? trip.assigned_driver.username :  "");
+        setCoUserName(trip.co_driver ? trip.co_driver.username :  "");
         setEditTrip(trip);
         setStep(0);
         setShowModal(true);
@@ -237,6 +245,101 @@ export default function Trips() {
     const [successMessageCreate, setSuccessMessageCreate] = useState(false);
     const [successMessageModify, setSuccessMessageModify] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
+    const [user_name, setUserName] = useState(null);
+    const [co_drivername, setCoUserName] = useState(null);
+    const [TotalNumberofPage, setTotalNumberPage] = useState(0);
+    const [actualPage, setActualPage] = useState(1);
+    const [TotalPage_list, setTotalPage_list] = useState([]);
+    const contentperPage = 10;
+
+    const changePage = async (p) => {
+        console.log('the p is ', p);
+        if (user && p > 0) {
+            setActualPage(p);
+            try {
+                const res = await axiosInstance.get("trip/trip_actions/"+ user?.id + "/?page=" + p);
+                console.log("The response given is ", res.data);
+                const listOn = res.data.results;
+
+                setAllTrips(prev => {
+                    const existingIds = new Set(prev.map(val => val.id));
+                    console.log('the existingIds arre ', existingIds);
+                    console.log('the listOn arre ', listOn.map(value => value.id));
+                    const newTrips = listOn.filter(value => !existingIds.has(value.id)); // ✅ filter out duplicates
+                    return [...prev, ...newTrips]; // ✅ append new trips to existing list
+                });
+
+            } catch (error) {
+                console.log("An error occurred here ", error);
+            }
+        }
+    }
+
+    const goToPreviousPage = (p) =>{
+        if (p <= 0) return; // guard against going before page 1
+
+        if (TotalPage_list.length > 3 && !TotalPage_list.includes(p)) {
+            setTotalPage_list(prev => [p, ...prev]);
+        }
+        
+        setActualPage(p);
+        changePage(p);
+    }
+
+    const handleChanges = (e) => {
+        const id = e.target.value;
+        form.assigned_driver_id = id;
+        const selectedUser = user_list.find(user => user.id == id);
+        setUserName(selectedUser ? selectedUser.username :  "");
+    }
+
+    const handleChanges2 = (e) => {
+        const id = e.target.value;
+        form.co_driver_id = id;
+        const selectedUser = user_list.find(user => user.id == id);
+        setCoUserName(selectedUser ? selectedUser.username :  "");
+    }
+
+    const goToNextPage = () => {
+        if (TotalPage_list.length > 3) {
+            const updatedList = TotalPage_list.slice(1); // replaces splice(0,1)
+            setTotalPage_list(updatedList);
+            const nextPage = updatedList.at(2);
+            setActualPage(nextPage);
+            changePage(nextPage);
+        }
+    }
+
+    function loadPages(totalElements){
+        const content_per_page = contentperPage;
+        // const totalElements = TotalNumberofPage;
+        console.log("the total number of pages are ", totalElements);
+        let pages = Math.trunc(totalElements/content_per_page);
+        console.log("the total number of pages are ", pages);
+        const newPages = []; 
+        if(totalElements%content_per_page==0){
+            console.log("the total number of pages are first if block ", pages);
+            for (let index = 1; index <= pages; index++) {
+                newPages.push(index);
+            }
+        }
+        else{
+            console.log("the total number of pages are else block ", pages);
+            const remainder = Math.trunc(totalElements % content_per_page);
+            if(remainder!=totalElements){
+                console.log("the total number of pages are else block 2 == ", remainder);
+                const totalPages = remainder+pages;
+                for (let index = 1; index <= totalPages; index++) {
+                    newPages.push(index);
+                }
+            }else{
+                newPages.push(1);
+            }
+
+        }
+        console.log("the total number of pages are ////// ", newPages);
+        setTotalPage_list(newPages);
+    }
 
     // Requests end
     useEffect(() => {
@@ -258,21 +361,26 @@ export default function Trips() {
   return (
     <div className="trips-page">
       <div className="trips-topbar">
-        <h1 className="trips-title">Trips</h1>
-        <button className="btn-primary w-25" 
-        onClick={() => {
-        setEditTrip(null);
-        setForm({
-            assigned_driver_id: "", co_driver_id: "", driver_number: "",
-            tractor_number: "", origin: "", destination: "",
-            departure_date: "", departure_time: "", cargo_type: "",
-            shipper_name: "", load_number: "", hos_cycle: "",
-        });
-        setStep(0);
-        setShowModal(true);
-        }}>
-          <span className="btn-icon">+</span> Plan new trip
-        </button>
+        <div>
+            <h1 className="trips-title">Trips</h1>
+        </div>
+        <div>
+            <button className="btn-primary" 
+            onClick={() => {
+            setEditTrip(null);
+            setForm({
+                assigned_driver_id: "", co_driver_id: "", driver_number: "",
+                tractor_number: "", origin: "", destination: "",
+                departure_date: "", departure_time: "", cargo_type: "",
+                shipper_name: "", load_number: "", hos_cycle: "",
+            });
+            setStep(0);
+            setShowModal(true);
+            }}>
+            <span className="btn-icon">+</span> Plan new trip
+            </button>
+        </div>
+
       </div>
 
         {/* Modal */}
@@ -321,7 +429,7 @@ export default function Trips() {
                 <div className="form-section">
                 <div className="form-row">
                     <div className="field">
-                    <label className="field-label">Origin</label>
+                    <label className="field-label">Origin <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
                         <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
                         <input
@@ -333,7 +441,7 @@ export default function Trips() {
                     </div>
                     </div>
                     <div className="field">
-                    <label className="field-label">Destination</label>
+                    <label className="field-label">Destination <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
                         <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                         <input
@@ -347,7 +455,7 @@ export default function Trips() {
                 </div>
                 <div className="form-row">
                     <div className="field">
-                    <label className="field-label">Tractor Number</label>
+                    <label className="field-label">Tractor Number <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
                         <input
                         type="text"
@@ -358,7 +466,7 @@ export default function Trips() {
                     </div>
                     </div>
                     <div className="field">
-                    <label className="field-label">Driver Number</label>
+                    <label className="field-label">Driver Number <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
                         <input
                         type="number"
@@ -383,9 +491,9 @@ export default function Trips() {
                 <div className="form-section">
                 <div className="form-row">
                     <div className="field">
-                    <label className="field-label">Departure date</label>
+                    <label className="field-label">Departure date <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
-                        <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        {/* <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> */}
                         <input
                         type="date"
                         value={form.departure_date}
@@ -394,9 +502,9 @@ export default function Trips() {
                     </div>
                     </div>
                     <div className="field">
-                    <label className="field-label">Departure time</label>
+                    <label className="field-label">Departure time <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap">
-                        <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {/* <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> */}
                         <input
                         type="time"
                         value={form.departure_time}
@@ -407,7 +515,7 @@ export default function Trips() {
                 </div>
 
                 <div className="field">
-                    <label className="field-label">Cargo type</label>
+                    <label className="field-label">Cargo type <span style={{color: "red"}}>*</span></label>
                     <div className="cargo-grid">
                     {cargo_types.map(c => (
                         <button
@@ -425,9 +533,9 @@ export default function Trips() {
 
                 <div className="form-row">
                     <div className="field">
-                        <label className="field-label">Assign Driver</label>
+                        <label className="field-label">Assign Driver <span style={{color: "red"}}>*</span></label>
                         <div className="field-input-wrap select-wrap">
-                            <select value={form.assigned_driver_id} onChange={e => set("assigned_driver_id", e.target.value)}>
+                            <select value={form.assigned_driver_id} onChange={handleChanges}>
                             <option value="">Select Assign Driver</option>
                             {user_list.map(d => <option key={d.id} value={d.id || form.assigned_driver_id}>
                                 {d.username}
@@ -439,7 +547,7 @@ export default function Trips() {
                     <div className="field">
                         <label className="field-label">Co Driver</label>
                         <div className="field-input-wrap select-wrap">
-                            <select value={form.co_driver_id} onChange={e => set("co_driver_id", e.target.value)}>
+                            <select value={form.co_driver_id} onChange={handleChanges2}>
                             <option value="">Select Co Driver</option>
                             {user_list.map(d => <option key={d.id} value={d.id || form.co_driver_id}>
                                 {d.username}
@@ -451,7 +559,7 @@ export default function Trips() {
                 </div>
 
                 <div className="field">
-                    <label className="field-label">HOS Cycle</label>
+                    <label className="field-label">HOS Cycle <span style={{color: "red"}}>*</span></label>
                     <div className="field-input-wrap select-wrap">
                         <select value={form.hos_cycle} onChange={e => set("hos_cycle", e.target.value)}>
                         <option value="">Select HOS Cycle</option>
@@ -478,7 +586,7 @@ export default function Trips() {
 
                 <div className="form-row">
                     <div className="field">
-                        <label className="field-label">Shipper Name</label>
+                        <label className="field-label">Shipper Name <span style={{color: "red"}}>*</span></label>
                         <div className="field-input-wrap">
                             <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             <input
@@ -489,7 +597,7 @@ export default function Trips() {
                         </div>
                     </div>
                     <div className="field">
-                        <label className="field-label">Load Number</label>
+                        <label className="field-label">Load Number <span style={{color: "red"}}>*</span></label>
                         <div className="field-input-wrap">
                             <svg className="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             <input
@@ -523,8 +631,8 @@ export default function Trips() {
                     <span className="review-value">{form.tractor_number}</span>
                     </div>
                     <div className="review-row">
-                    <span className="review-label">Driver Number</span>
-                    <span className="review-value">{form.driver_number} mph</span>
+                        <span className="review-label">Driver Number</span>
+                        <span className="review-value">{form.driver_number} mph</span>
                     </div>
                     <div className="review-row">
                     <span className="review-label">Departure</span>
@@ -536,7 +644,7 @@ export default function Trips() {
                     </div>
                     <div className="review-row">
                     <span className="review-label">Assigned Driver</span>
-                    <span className="review-value">{form.assigned_driver_id}</span>
+                    <span className="review-value">{user_name}</span>
                     </div>
                     <div className="review-row">
                     <span className="review-label">HOS Cycle</span>
@@ -553,7 +661,7 @@ export default function Trips() {
                     {form.co_driver_id && (
                     <div className="review-row">
                         <span className="review-label">Co-Driver</span>
-                        <span className="review-value">{form.co_driver_id}</span>
+                        <span className="review-value">{co_drivername}</span>
                     </div>
                     )}
                 </div>
@@ -658,7 +766,8 @@ export default function Trips() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(t => (
+              {filtered.slice((actualPage - 1) * contentperPage, actualPage * contentperPage)
+                    .map(t => (
                 <tr key={t.id}>
                   <td className="trip-id">{t.tractor_number}</td>
                   <td className="trip-route">{t.origin} -{">"} {t.destination}</td>
@@ -673,11 +782,50 @@ export default function Trips() {
                   <td className="buttonsarr">
                     <button className="btn btn-secondary btn-sm" onClick={() => view_trip(t)}><i className="bi bi-eye"></i></button>
                     <button className="btn colr btn-sm" onClick={() => open_edit(t)}><i className="bi bi-pencil"></i></button>
+                    {/* <button className="btn colr2 btn-sm" onClick={() => open_edit(t)}><i className="bi bi-trash"></i></button> */}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+            {TotalNumberofPage > 0 && (
+                <div className="allignItems">
+                    <nav aria-label="Page navigation example">
+                        <ul className="pagination">
+                            <li className="page-item mr-4">
+                                <button
+                                    className="btn btn-md btn-buttons-prev"
+                                    type="button"
+                                    onClick={() => goToPreviousPage(actualPage - 1)}  // ✅ arrow function
+                                >
+                                    Previous
+                                </button>
+                            </li>
+                            <li className="page-item" style={{cursor: "pointer"}}>
+                                {TotalPage_list?.slice(0,3).map((pages, index) => (
+                                    <button
+                                        key={index}
+                                        className={`btn btn-md ${actualPage == pages ? 'btn-buttons-active' : ''} ${pages == 1 ? 'firstPage' : ''} ${pages > 1 ? 'midPage' : ''}`}  // ✅ one template literal
+                                        type="button"
+                                        onClick={() => changePage(pages)}
+                                    >
+                                        {pages} 
+                                    </button>
+                                ))}
+                            </li>
+                            <li className="page-item" style={{cursor: "pointer"}}>
+                                <button
+                                    className="btn btn-md btn-buttons-notactives NextPage"
+                                    type="button"
+                                    onClick={() => goToNextPage()}  // ✅ arrow function
+                                >
+                                    {'>'}
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
             <br />
             <br />
             {successMessageCreate && (

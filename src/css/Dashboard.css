@@ -460,6 +460,7 @@ nav {
 
 .btn-action-primary {
   background-color: #1b66ff;
+  text-decoration: none;
   color: #ffffff;
   border: none;
 }
